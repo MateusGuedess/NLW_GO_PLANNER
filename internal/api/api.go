@@ -8,7 +8,8 @@ import (
 	"net/http"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"go.uber.org/zap"
 )
 
@@ -20,6 +21,13 @@ type store interface {
 type API struct {
 	store store
 	logger *zap.Logger
+}
+
+func NewAPI(pool *pgxpool.Pool, logger *zap.Logger) API {
+	return API{
+		store: pgstore.New(pool),
+		logger: logger,
+	}
 }
 
 // Confirms a participant on a trip.
@@ -36,6 +44,7 @@ func (api API) PatchParticipantsParticipantIDConfirm(w http.ResponseWriter,  r *
 		if errors.Is(err, pgx.ErrNoRows) {
 			return spec.PatchParticipantsParticipantIDConfirmJSON400Response(spec.Error{Message: "participante não encontrado"})
 		}
+
 		api.logger.Error("failed to get participant", zap.Error(err), zap.String("participant_id", participantID))
 		return spec.PatchParticipantsParticipantIDConfirmJSON400Response(spec.Error{Message: "something went wrong, try again"})
 	}
@@ -49,7 +58,7 @@ func (api API) PatchParticipantsParticipantIDConfirm(w http.ResponseWriter,  r *
 	if err := api.store.ConfirmParticipant(r.Context(), id); err != nil {
 		api.logger.Error("failed to confirm participant", zap.Error(err), zap.String("participant_id", participantID))
 
-		return spec.PatchParticipantsParticipantIDConfirmJSON400Response(spec.Error{Message: "something went wrong, try again"})
+		return spec.PatchParticipantsParticipantIDConfirmJSON400Response(spec.Error{Message: "something went wrong, try again s"})
 	}
 
 	return spec.PatchParticipantsParticipantIDConfirmJSON204Response(nil)
@@ -83,4 +92,35 @@ func (api API) GetTripsTripIDActivities(w http.ResponseWriter, r *http.Request, 
 // (POST /trips/{tripId}/activities)
 func (api API) PostTripsTripIDActivities(w http.ResponseWriter, r *http.Request, tripID string) *spec.Response {
 	panic("not implemented") //TODO: Implement
+}
+
+
+// Confirm a trip and send e-mail invitations.
+// (GET /trips/{tripId}/confirm)
+func (API) GetTripsTripIDConfirm(w http.ResponseWriter, r *http.Request, tripID string) *spec.Response {
+	panic("not implemented") // TODO: Implement
+}
+
+// Invite someone to the trip.
+// (POST /trips/{tripId}/invites)
+func (API) PostTripsTripIDInvites(w http.ResponseWriter, r *http.Request, tripID string) *spec.Response {
+	panic("not implemented") // TODO: Implement
+}
+
+// Get a trip links.
+// (GET /trips/{tripId}/links)
+func (API) GetTripsTripIDLinks(w http.ResponseWriter, r *http.Request, tripID string) *spec.Response {
+	panic("not implemented") // TODO: Implement
+}
+
+// Create a trip link.
+// (POST /trips/{tripId}/links)
+func (API) PostTripsTripIDLinks(w http.ResponseWriter, r *http.Request, tripID string) *spec.Response {
+	panic("not implemented") // TODO: Implement
+}
+
+// Get a trip participants.
+// (GET /trips/{tripId}/participants)
+func (API) GetTripsTripIDParticipants(w http.ResponseWriter, r *http.Request, tripID string) *spec.Response {
+	panic("not implemented") // TODO: Implement
 }
