@@ -2,12 +2,12 @@ package api
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"journey/internal/api/spec"
 	"journey/internal/pgstore"
 	"net/http"
 
-	"github.com/goccy/go-json"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -68,7 +68,7 @@ func (api API) PatchParticipantsParticipantIDConfirm(w http.ResponseWriter,  r *
 // Creates a new trip.
 // (POST /trips)
 func (api *API) PostTrips(w http.ResponseWriter, r *http.Request) *spec.Response {
-	var body spec.PostTripsJSONBody
+	var body spec.CreateTripRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		return spec.PostTripsJSON400Response(spec.Error{Message: "invalid request body or JSON"})
@@ -77,6 +77,7 @@ func (api *API) PostTrips(w http.ResponseWriter, r *http.Request) *spec.Response
 	if len(body.Destination) < 4 {
 		return spec.PostTripsJSON400Response(spec.Error{Message: "destination must be at least 4 characters long"})
 	}
+
 }
 
 // Get a trip details.
