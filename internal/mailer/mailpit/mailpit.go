@@ -6,21 +6,22 @@ import (
 	"journey/internal/pgstore"
 	"time"
 
-	"github.com/gofrs/uuid"
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/wneessen/go-mail"
 )
 
 
 type store interface {
-	GetTrip(context.Context, uuid.UUID) (pgstore.Trip, error)
+	GetTrip(context.Context, uuid.UUID) (pgstore.GetTripRow, error)
 }
 
 type Mailpit struct {
 	store store
 }
 
-func NewMailPit() Mailpit {
-	return Mailpit{}
+func NewMailPit(pool *pgxpool.Pool) Mailpit {
+	return Mailpit{pgstore.New(pool)}
 }
 
 func (mp Mailpit) SendConfirmTripEmailToTripOwner(tripID uuid.UUID ) error {
@@ -50,7 +51,7 @@ func (mp Mailpit) SendConfirmTripEmailToTripOwner(tripID uuid.UUID ) error {
 	`, trip.OwnerName, trip.Destination, trip.StartsAt.Time.Format(time.DateOnly)),
 	)
 
-	client, err := mail.NewClient("localhost", mail.WithTLSPortPolicy(mail.NoTLS), mail.WithPort(1025))
+	client, err := mail.NewClient("mailpit", mail.WithTLSPortPolicy(mail.NoTLS), mail.WithPort(1025))
 
 	if err != nil {
 		return fmt.Errorf("mailpit: failed to create email client SendConfirmTripEmailToTripOwner: %w", err)
