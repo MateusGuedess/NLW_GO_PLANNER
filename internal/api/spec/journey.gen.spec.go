@@ -23,14 +23,41 @@ import (
 	"github.com/go-chi/render"
 )
 
+// CreateActivityRequest defines model for CreateActivityRequest.
+type CreateActivityRequest struct {
+	OccursAt time.Time `json:"occurs_at" validate:"required"`
+	Title    string    `json:"title" validate:"required"`
+}
+
+// CreateActivityResponse defines model for CreateActivityResponse.
+type CreateActivityResponse struct {
+	ActivityID string `json:"activityId"`
+}
+
+// CreateLinkRequest defines model for CreateLinkRequest.
+type CreateLinkRequest struct {
+	Title string `json:"title" validate:"required"`
+	URL   string `json:"url" validate:"required,url"`
+}
+
+// CreateLinkResponse defines model for CreateLinkResponse.
+type CreateLinkResponse struct {
+	LinkID string `json:"linkId"`
+}
+
 // CreateTripRequest defines model for CreateTripRequest.
 type CreateTripRequest struct {
-	Destination    string                `json:"destination" validate:"required,lte=4"`
-	EmailsToInvite []openapi_types.Email `json:"emails_to_invite"`
-	EndsAt         time.Time             `json:"ends_at"`
-	OwnerEmail     openapi_types.Email   `json:"owner_email"`
-	OwnerName      string                `json:"owner_name"`
-	StartsAt       time.Time             `json:"starts_at"`
+	Destination    string                `json:"destination" validate:"required,min=4"`
+	EmailsToInvite []openapi_types.Email `json:"emails_to_invite" validate:"required,dive,email"`
+	EndsAt         time.Time             `json:"ends_at" validate:"required"`
+	OwnerEmail     openapi_types.Email   `json:"owner_email" validate:"required,email"`
+	OwnerName      string                `json:"owner_name" validate:"required"`
+	StartsAt       time.Time             `json:"starts_at" validate:"required"`
+}
+
+// CreateTripResponse defines model for CreateTripResponse.
+type CreateTripResponse struct {
+	TripID string `json:"tripId"`
 }
 
 // Bad request
@@ -38,26 +65,43 @@ type Error struct {
 	Message string `json:"message"`
 }
 
-// GetTripActivitiesInner defines model for GetTripActivitiesInner.
-type GetTripActivitiesInner struct {
+// GetLinksResponse defines model for GetLinksResponse.
+type GetLinksResponse struct {
+	Links []GetLinksResponseArray `json:"links"`
+}
+
+// GetLinksResponseArray defines model for GetLinksResponseArray.
+type GetLinksResponseArray struct {
+	ID    string `json:"id"`
+	Title string `json:"title"`
+	URL   string `json:"url"`
+}
+
+// GetTripActivitiesResponse defines model for GetTripActivitiesResponse.
+type GetTripActivitiesResponse struct {
+	Activities []GetTripActivitiesResponseOuterArray `json:"activities"`
+}
+
+// GetTripActivitiesResponseInnerArray defines model for GetTripActivitiesResponseInnerArray.
+type GetTripActivitiesResponseInnerArray struct {
 	ID       string    `json:"id"`
 	OccursAt time.Time `json:"occurs_at"`
 	Title    string    `json:"title"`
 }
 
-// GetTripActivitiesOuter defines model for GetTripActivitiesOuter.
-type GetTripActivitiesOuter struct {
-	Activities []GetTripActivitiesInner `json:"activities"`
-	Date       time.Time                `json:"date"`
+// GetTripActivitiesResponseOuterArray defines model for GetTripActivitiesResponseOuterArray.
+type GetTripActivitiesResponseOuterArray struct {
+	Activities []GetTripActivitiesResponseInnerArray `json:"activities"`
+	Date       time.Time                             `json:"date"`
 }
 
-// GetTripActivitiesResponse defines model for GetTripActivitiesResponse.
-type GetTripActivitiesResponse struct {
-	Activities []GetTripActivitiesOuter `json:"activities"`
+// GetTripDetailsResponse defines model for GetTripDetailsResponse.
+type GetTripDetailsResponse struct {
+	Trip GetTripDetailsResponseTripObj `json:"trip"`
 }
 
-// GetTripInner defines model for GetTripInner.
-type GetTripInner struct {
+// GetTripDetailsResponseTripObj defines model for GetTripDetailsResponseTripObj.
+type GetTripDetailsResponseTripObj struct {
 	Destination string    `json:"destination"`
 	EndsAt      time.Time `json:"ends_at"`
 	ID          string    `json:"id"`
@@ -65,77 +109,45 @@ type GetTripInner struct {
 	StartsAt    time.Time `json:"starts_at"`
 }
 
-// GetTripLinkResponse defines model for GetTripLinkResponse.
-type GetTripLinkResponse struct {
-	Links []GetTripLinksInner `json:"links"`
+// GetTripParticipantsResponse defines model for GetTripParticipantsResponse.
+type GetTripParticipantsResponse struct {
+	Participants []GetTripParticipantsResponseArray `json:"participants"`
 }
 
-// GetTripLinksInner defines model for GetTripLinksInner.
-type GetTripLinksInner struct {
-	ID    string `json:"id"`
-	Title string `json:"title"`
-	URL   string `json:"url"`
-}
-
-// GetTripParticipantsInner defines model for GetTripParticipantsInner.
-type GetTripParticipantsInner struct {
+// GetTripParticipantsResponseArray defines model for GetTripParticipantsResponseArray.
+type GetTripParticipantsResponseArray struct {
 	Email       openapi_types.Email `json:"email"`
 	ID          string              `json:"id"`
 	IsConfirmed bool                `json:"is_confirmed"`
 	Name        *string             `json:"name"`
 }
 
-// GetTripParticipantsResponse defines model for GetTripParticipantsResponse.
-type GetTripParticipantsResponse struct {
-	Participants []GetTripParticipantsInner `json:"participants"`
+// InviteParticipantRequest defines model for InviteParticipantRequest.
+type InviteParticipantRequest struct {
+	Email openapi_types.Email `json:"email" validate:"required,email"`
 }
 
-// GetTripResponse defines model for GetTripResponse.
-type GetTripResponse struct {
-	Trip GetTripInner `json:"trip"`
-}
-
-// PostTripActivitiesResponse defines model for PostTripActivitiesResponse.
-type PostTripActivitiesResponse struct {
-	ActivityID string `json:"activityId"`
-}
-
-// PostTripLinksResponse defines model for PostTripLinksResponse.
-type PostTripLinksResponse struct {
-	LinkID string `json:"linkId"`
-}
-
-// PostTripsResponse defines model for PostTripsResponse.
-type PostTripsResponse struct {
-	TripID string `json:"tripId"`
+// UpdateTripRequest defines model for UpdateTripRequest.
+type UpdateTripRequest struct {
+	Destination string    `json:"destination" validate:"required,min=4"`
+	EndsAt      time.Time `json:"ends_at" validate:"required"`
+	StartsAt    time.Time `json:"starts_at" validate:"required"`
 }
 
 // PostTripsJSONBody defines parameters for PostTrips.
 type PostTripsJSONBody CreateTripRequest
 
 // PutTripsTripIDJSONBody defines parameters for PutTripsTripID.
-type PutTripsTripIDJSONBody struct {
-	Destination string    `json:"destination"`
-	EndsAt      time.Time `json:"ends_at"`
-	StartsAt    time.Time `json:"starts_at"`
-}
+type PutTripsTripIDJSONBody UpdateTripRequest
 
 // PostTripsTripIDActivitiesJSONBody defines parameters for PostTripsTripIDActivities.
-type PostTripsTripIDActivitiesJSONBody struct {
-	OccursAt time.Time `json:"occurs_at"`
-	Title    string    `json:"title"`
-}
+type PostTripsTripIDActivitiesJSONBody CreateActivityRequest
 
 // PostTripsTripIDInvitesJSONBody defines parameters for PostTripsTripIDInvites.
-type PostTripsTripIDInvitesJSONBody struct {
-	Email openapi_types.Email `json:"email"`
-}
+type PostTripsTripIDInvitesJSONBody InviteParticipantRequest
 
 // PostTripsTripIDLinksJSONBody defines parameters for PostTripsTripIDLinks.
-type PostTripsTripIDLinksJSONBody struct {
-	Title string `json:"title"`
-	URL   string `json:"url"`
-}
+type PostTripsTripIDLinksJSONBody CreateLinkRequest
 
 // PostTripsJSONRequestBody defines body for PostTrips for application/json ContentType.
 type PostTripsJSONRequestBody PostTripsJSONBody
@@ -240,7 +252,7 @@ func PatchParticipantsParticipantIDConfirmJSON400Response(body Error) *Response 
 
 // PostTripsJSON201Response is a constructor method for a PostTrips response.
 // A *Response is returned with the configured status code and content type from the spec.
-func PostTripsJSON201Response(body PostTripsResponse) *Response {
+func PostTripsJSON201Response(body CreateTripResponse) *Response {
 	return &Response{
 		body:        body,
 		Code:        201,
@@ -260,7 +272,7 @@ func PostTripsJSON400Response(body Error) *Response {
 
 // GetTripsTripIDJSON200Response is a constructor method for a GetTripsTripID response.
 // A *Response is returned with the configured status code and content type from the spec.
-func GetTripsTripIDJSON200Response(body GetTripResponse) *Response {
+func GetTripsTripIDJSON200Response(body GetTripDetailsResponse) *Response {
 	return &Response{
 		body:        body,
 		Code:        200,
@@ -320,7 +332,7 @@ func GetTripsTripIDActivitiesJSON400Response(body Error) *Response {
 
 // PostTripsTripIDActivitiesJSON201Response is a constructor method for a PostTripsTripIDActivities response.
 // A *Response is returned with the configured status code and content type from the spec.
-func PostTripsTripIDActivitiesJSON201Response(body PostTripActivitiesResponse) *Response {
+func PostTripsTripIDActivitiesJSON201Response(body CreateActivityResponse) *Response {
 	return &Response{
 		body:        body,
 		Code:        201,
@@ -380,7 +392,7 @@ func PostTripsTripIDInvitesJSON400Response(body Error) *Response {
 
 // GetTripsTripIDLinksJSON200Response is a constructor method for a GetTripsTripIDLinks response.
 // A *Response is returned with the configured status code and content type from the spec.
-func GetTripsTripIDLinksJSON200Response(body GetTripLinkResponse) *Response {
+func GetTripsTripIDLinksJSON200Response(body GetLinksResponse) *Response {
 	return &Response{
 		body:        body,
 		Code:        200,
@@ -400,7 +412,7 @@ func GetTripsTripIDLinksJSON400Response(body Error) *Response {
 
 // PostTripsTripIDLinksJSON201Response is a constructor method for a PostTripsTripIDLinks response.
 // A *Response is returned with the configured status code and content type from the spec.
-func PostTripsTripIDLinksJSON201Response(body PostTripLinksResponse) *Response {
+func PostTripsTripIDLinksJSON201Response(body CreateLinkResponse) *Response {
 	return &Response{
 		body:        body,
 		Code:        201,
@@ -910,29 +922,30 @@ func WithErrorHandler(handler func(w http.ResponseWriter, r *http.Request, err e
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/+RZz27jthN+FYK/31GOs21OAnrYf1i4WLRBsEUPi0UwkcY2NxKpJUfJGoafpoeeeuwT",
-	"5MUKkrJNybIja+2mzp5iMfwzM983H4fknCcqL5RESYbHc26SKebgfr7WCIQftCiu8EuJhmwjpKkgoSRk",
-	"l1oVqEmg4fEYMoMRL4KmOU/RkJBge9vPXMj3KCc05fFFxGlWII+5IS3khEf862CiBviVNAwIJm78HWQi",
-	"BbLdNH4phcY0ygh/uuCLRcQxB5GZa1LXQt4J22vOBWHuho6VzoF47Hvx5nKLVQNoDTP7jTI110C1wXbx",
-	"AYkc2yZQ9xL1tZ+/04p+gITcmbrxb0OgaR8TFtEqLDz+WIt2ONvatZaY1ayq+/RptaC6+YwJWRvfaq30",
-	"oyxI0SRaFB53/gpSpiv+NBmSozEwaYtHw7llxzaj3iFZjr5MSNwJO/NIStR7clWktbCXpUhbMUySUu/H",
-	"ExKUdfDQr+f6hst0cvjXkvZ2GFaja4nzf41jHvP/DdeqMKwkYbgl0C3J5LO2H43B0TIwr1MIrtAUShp8",
-	"gij46G9EoeFXN4f6UHcPme2jcx0zQ5jrRMmx0DmmAdtvlMoQ5CEEzq3bReVqpuwI9nshb3vyJhPydm/K",
-	"2PW25UzDVz//I7YfU+i2qVbES13f70otukG3FDc7wQ7PLkGTSEQBkno5uMeOLNJWDx+n8nITl2WWwY0N",
-	"FOkSO0Wh2mmXNnXlahiVnpwtgin2pe4mKI8xuLbaDsd6OkNaFB1tr+xt2OcmaLPrUpmD7i2zUZeMa98t",
-	"7NhdNjoV+AYJ62NaNW6XWeYbQO1jUjVu0yTbUcixqrbJoCp9awpMxFgk8PDnw99oWArs5eWIFaCBKXYD",
-	"ye0AZWqboch8tz8UKzKQ8gw1S5Q0pMuHv1JgaalBEjLFfnn/O/tZlVrizI68UsktkkGgs5X+xXw5B4/4",
-	"HWrj7Xlxdn527irMAiUUgsf8R9cU8QJo6sIzDHNqOA++RuliWMmIz3RKpvaHDa7bK21U+aVtDjM5+D16",
-	"87oabxfUkCOhNjz+OOfC2meNWKpXzGtL8xAMr4M+A7sA+ckO9mRxPv5wfmH/JEoSSn/gLFz8rRfDz8bX",
-	"OOv5UZa5pYBVYkuAuiI7AtSBf4NjKDNiK4ouIn5xfr7XortExx+RWhYOz0H2v6bMc9AzHvMq8oYBCwLL",
-	"lGTALLUdedyZuCmrdp6h7eIFXvkjegP1ZVJWOKGhVyqdHczhzVuCRT0/HRAbML84mAGbqnMisLvAMWAS",
-	"7x3OAcwe0wDf4dyL3MIaMsEWnKvdzrgt702nNK5087D5e7iYNiuE04D1HVKVtyxFApGZsxZgI16Ubcla",
-	"PhmI/ZThv3NOPf79WXt98ZjQfX/72W9F6oWtuXltV7Vh/SKmErj6gh+mwjCtSkJ2L7KMaaRSSwZZxmiK",
-	"zK5p2A3SPaJ0LS4HV0AykCmroPSdI4Z3rqsydkqaqpLY2hBr+S6JXR8QnpHYtpx6Tk526xAuyRdewFn5",
-	"3V0sPSnER5fi411jr2deDumnmocvD0+W2as6MST3bCu1W8Q1OBp2KB33OQgeRdS+2xPgCmOZMoN2uxrk",
-	"IDLmHuucKabjduqf97qcCj3mo6r/s1K5zjfBDQ3b9v55eN16Dtz11GFG5agkMlKr2qvLvcWasqsnlQ4S",
-	"5e49n1HVVXuJOrl6yyEXgl29XnWtsv59NI8uPYd9Ptv9cvY05VT96eEUKynL0jbWtmhT8+msg0SF9+zP",
-	"SKla3yFPTrFCPHftUovFPwEAAP//W4ZV0h8nAAA=",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file
