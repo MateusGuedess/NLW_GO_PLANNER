@@ -8,6 +8,7 @@ import (
 	"journey/internal/pgstore"
 	"net/http"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -22,12 +23,15 @@ type store interface {
 type API struct {
 	store store
 	logger *zap.Logger
+	validator *validator.Validate
 }
 
 func NewAPI(pool *pgxpool.Pool, logger *zap.Logger) API {
+	validator := validator.New(validator.WithRequiredStructEnabled())
 	return API{
 		store: pgstore.New(pool),
 		logger: logger,
+		validator: validator,
 	}
 }
 
@@ -74,8 +78,8 @@ func (api *API) PostTrips(w http.ResponseWriter, r *http.Request) *spec.Response
 		return spec.PostTripsJSON400Response(spec.Error{Message: "invalid request body or JSON"})
 	}
 
-	if len(body.Destination) < 4 {
-		return spec.PostTripsJSON400Response(spec.Error{Message: "destination must be at least 4 characters long"})
+	if err := api.validator.Struct(body); err != nil {
+		return spec.PostTripsJSON400Response(spec.Error{Message: "invalid input: " + err.Error() })
 	}
 
 }
