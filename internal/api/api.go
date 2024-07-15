@@ -78,7 +78,7 @@ func (api *API) PostTrips(w http.ResponseWriter, r *http.Request) *spec.Response
 	var body spec.CreateTripRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		return spec.PostTripsJSON400Response(spec.Error{Message: "invalid request body or JSON"})
+		return spec.PostTripsJSON400Response(spec.Error{Message: "invalid request body or JSON: " + err.Error()})
 	}
 
 	if err := api.validator.Struct(body); err != nil {
